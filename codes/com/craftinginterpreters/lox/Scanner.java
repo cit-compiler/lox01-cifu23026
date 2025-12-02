@@ -5,17 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static codes.com.craftinginterpreters.lox.TokenType.COMMA;
-import static codes.com.craftinginterpreters.lox.TokenType.DOT;
-import static codes.com.craftinginterpreters.lox.TokenType.EOF;
-import static codes.com.craftinginterpreters.lox.TokenType.LEFT_BRACE;
-import static codes.com.craftinginterpreters.lox.TokenType.LEFT_PAREN;
-import static codes.com.craftinginterpreters.lox.TokenType.MINUS;
-import static codes.com.craftinginterpreters.lox.TokenType.PLUS;
-import static codes.com.craftinginterpreters.lox.TokenType.RIGHT_BRACE;
-import static codes.com.craftinginterpreters.lox.TokenType.RIGHT_PAREN;
-import static codes.com.craftinginterpreters.lox.TokenType.SEMICOLON;
-import static codes.com.craftinginterpreters.lox.TokenType.STAR;
 import static codes.com.craftinginterpreters.lox.TokenType.*;
 
 public class Scanner {
@@ -52,10 +41,50 @@ public class Scanner {
             case '+': addToken(PLUS); break;
             case ';': addToken(SEMICOLON); break;
             case '*': addToken(STAR); break; 
+            case '!':
+                addToken(match('=') ? BANG_EQUAL : BANG);
+                break;
+            case '=':
+                addToken(match('=') ? EQUAL_EQUAL : EQUAL);
+                break;
+            case '<':
+                addToken(match('=') ? LESS_EQUAL : LESS);
+                break;
+            case '>':
+                addToken(match('=') ? GREATER_EQUAL : GREATER);
+                break;
+            case '/':
+                if(match('/')){
+                    while(peek() != '\n' && !isAtEnd()) advance();
+                }else{
+                    addToken(SLASH);
+                }
+                break;
+            case ' ':
+            case '\r':
+            case '\t':
+                break;
+            
+            case '\n':
+                line++;
+                break;
 
             default: Lox.error(line, "Unexpected character.");
             break;
         }
+    }
+
+    private boolean match(char expected){
+        if(isAtEnd()) return false;
+        if(source.charAt(current) != expected) return false;
+
+        current++;
+        return true;
+    }
+
+    private char peek() {
+        if (isAtEnd()) return '\0';
+        return source.charAt(current);
     }
 
     private boolean isAtEnd(){
